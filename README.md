@@ -1,4 +1,4 @@
-#rs-samples
+# rs-samples
 Collection of small, mostly independent and well-commented Rust code
 samples.  
 Mostly a learning exercise, with the hope that others will find it useful. Feel
