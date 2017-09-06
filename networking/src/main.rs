@@ -30,20 +30,40 @@ fn handle_connection(mut stream: TcpStream) {
     // with the unicode replacement character �
     println!("= Request:\n{}\n", String::from_utf8_lossy(&buffer[..]));
 
+    // Create a slice of raw bytes from a string by using "b" in front of the
+    // string literal
+    //
+    // This represents a request requesting for the root page of the server
+    let get_request = b"GET / HTTP/1.1\r\n";
+
+    // This syntax allows us to return a tuple of values from the if expression
+    // depending on which of the branches of the if expression was taken by the
+    // code. Since the branches are expressions, these can be assigned to a
+    // variable
+    //
+    // If the client requests the root page, we return our equivalent of
+    // an index.html; if not, simply return a 404
+    let (status_line, filename) = if buffer.starts_with(get_request) {
+        ("HTTP/1.1 200 OK\r\n\r\n", "hello_rust.html")
+    }
+    else {
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
+    }; // The ; for the two variables which we are creating is here
+
     // ::open will create a File instance; it can be thought of as when calling
     // ::new on other types. (this might help some understand as it is somehow
     // more similar to using ::operator new() in C++
     //
     // We make the file mut because the traits function .read_to_string (from
     // the trait std::io::Read) uses a mut ref to self when calling the method
-    let mut file_hello = File::open("hello_rust.html").unwrap();
+    let mut file_to_serve = File::open(filename).unwrap();
 
     // Store the contents of the file in a string; make it mut because it will
     // be filled later and not at creation
-    let mut file_contents = String::new();
+    let mut content = String::new();
     // Place the whole contents of the file, until EOF is reached, into the
     // String passed
-    file_hello.read_to_string(&mut file_contents).unwrap();
+    file_to_serve.read_to_string(&mut content).unwrap();
 
     // format!() is a macro which creates a value of type String by using the
     // the syntax provided in the first argument. It can be thought of as a
@@ -53,7 +73,7 @@ fn handle_connection(mut stream: TcpStream) {
     //
     // It automatically panics if the formatting trait implementation returns an
     // error
-    let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", file_contents);
+    let response = format!("{}{}", status_line, content);
     println!("= Response:\n{}\n", response);
 
     // .as_bytes returns a non-mutable reference to a byte slice containing the
