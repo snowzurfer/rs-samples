@@ -4,6 +4,9 @@ samples.
 Mostly a learning exercise, with the hope that others will find it useful. Feel
 free to contribute to it by adding other simple examples.
 
+## rust-cookbook
+There is a collection of excellent rust samples available at [rust-cookbook](https://rust-lang-nursery.github.io/rust-cookbook/). Be sure to check those out too!
+
 ## Contributing
 Simply fork the repo and add your own folder with the example, I'll be happy
 to merge it in.
