@@ -14,6 +14,5 @@ to merge it in.
 * Mandlebrot set
 * Game of life
 * Networking server/client
- is working on it)
 * 2D pong
 * 2D basic platformer a-la _Super Crate Box_
