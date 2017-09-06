@@ -10,9 +10,10 @@ There is a collection of excellent rust samples available at [rust-cookbook](htt
 ## Contributing
 Simply fork the repo and add your own folder with the example, I'll be happy
 to merge it in.
-## Contributions ideas list
+#### Contributions ideas list
 * Mandlebrot set
 * Game of life
 * Networking server/client
+ is working on it)
 * 2D pong
 * 2D basic platformer a-la _Super Crate Box_

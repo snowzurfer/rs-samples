@@ -3,7 +3,28 @@
 // - std::net::TcpListener::bind(...)
 // we write:
 // - TcpListener::bind(...)
-use std::net::TcpListener;
+use std::io::prelude::*;
+use std::net::{TcpListener, TcpStream};
+
+// The parameter type is mutable and copy. That means that the function takes
+// ownership of "stream", and "stream" will go out of scope and be deleted
+// when the function completes
+fn handle_connection(mut stream: TcpStream) {
+    // Create a slice of integers, inferring their type
+    let mut buffer = [0; 512];
+
+    // Read the incoming data into the buffer
+    let buf_size = stream.read(&mut buffer).unwrap();
+
+    println!("Read {} bytes.", buf_size);
+
+    // ::from_utf8_lossy() takes a chunk of bytes representing utf-8 encoded
+    // unicode text and produces a string, replacing invalid utf-8 sequences
+    // with the unicode replacement character �
+    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+
+
+}
 
 fn main() {
     // Calling unwrap() causes the returned std::io::Result enum to be pattern
@@ -18,7 +39,7 @@ fn main() {
     // which implements the ToSocketAddrs trait, and strings do
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
 
-    println!("Bound TCP listener socket at {} on port {}.",
+    println!("Bound TCP listener socket at {} on port {}.\nListening...",
              listener.local_addr().unwrap().ip(),
              listener.local_addr().unwrap().port());
 
@@ -36,5 +57,9 @@ fn main() {
         let stream = stream.unwrap();
 
         println!("Connection established!");
+
+        handle_connection(stream);
+
+        println!("Closing connection.");
     }
 }

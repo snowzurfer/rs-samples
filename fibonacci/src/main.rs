@@ -2,7 +2,8 @@
 // Use this syntax to import more than one type from the same root type
 use std::io::{self, Write};
 
-fn fib_recursive(n: u64) -> u64 {
+
+fn fib_recursive(n: usize) -> usize {
     // Compared to C++, in Rust parenthesis around the expression for if/else
     // statements are not necessary. You can use them but the compiler will
     // warn you that they are unnecessary
@@ -23,7 +24,7 @@ fn fib_recursive(n: u64) -> u64 {
 }
 
 // A dynamic programming version of fib
-fn fib_dp(n: u64) -> u64 {
+fn fib_dp(n: usize) -> usize {
     if n == 0 || n == 1 {
         n
     } else {
@@ -91,6 +92,7 @@ fn main() {
     let n: u64 = n.trim().parse().expect("Invalid input!");
 
 
-    println!("The computed value is: {}", fib_recursive(n));
-    println!("The computed value is: {}", fib_dp(n));
+    println!("The computed value, computed recursively, is: {}",
+             fib_recursive(n));
+    println!("The computed value, computed functionally, is: {}", fib_dp(n));
 }
