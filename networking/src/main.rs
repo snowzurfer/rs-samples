@@ -3,8 +3,15 @@
 // - std::net::TcpListener::bind(...)
 // we write:
 // - TcpListener::bind(...)
+//
+// Importing std::io::prelude* is necessary to use the write/read functions of
+// the TCP streams. Rust specifies that you need to import the traits which the
+// types implement into scope before using the functions defined for such traits
+//
+// std::fs::File is used to open and manipule files on the filesystem
 use std::io::prelude::*;
 use std::net::{TcpListener, TcpStream};
+use std::fs::File;
 
 // The parameter type is mutable and copy. That means that the function takes
 // ownership of "stream", and "stream" will go out of scope and be deleted
@@ -16,14 +23,48 @@ fn handle_connection(mut stream: TcpStream) {
     // Read the incoming data into the buffer
     let buf_size = stream.read(&mut buffer).unwrap();
 
-    println!("Read {} bytes.", buf_size);
+    println!("= Read {} bytes.", buf_size);
 
     // ::from_utf8_lossy() takes a chunk of bytes representing utf-8 encoded
     // unicode text and produces a string, replacing invalid utf-8 sequences
     // with the unicode replacement character �
-    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+    println!("= Request:\n{}\n", String::from_utf8_lossy(&buffer[..]));
 
+    // ::open will create a File instance; it can be thought of as when calling
+    // ::new on other types. (this might help some understand as it is somehow
+    // more similar to using ::operator new() in C++
+    //
+    // We make the file mut because the traits function .read_to_string (from
+    // the trait std::io::Read) uses a mut ref to self when calling the method
+    let mut file_hello = File::open("hello_rust.html").unwrap();
 
+    // Store the contents of the file in a string; make it mut because it will
+    // be filled later and not at creation
+    let mut file_contents = String::new();
+    // Place the whole contents of the file, until EOF is reached, into the
+    // String passed
+    file_hello.read_to_string(&mut file_contents).unwrap();
+
+    // format!() is a macro which creates a value of type String by using the
+    // the syntax provided in the first argument. It can be thought of as a
+    // similar macro to print!() or println!() but instead of printing to the
+    // STDOUT, it "prints" the results into a String, and then returns such
+    // String.
+    //
+    // It automatically panics if the formatting trait implementation returns an
+    // error
+    let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", file_contents);
+    println!("= Response:\n{}\n", response);
+
+    // .as_bytes returns a non-mutable reference to a byte slice containing the
+    // byte representation of the String slice
+    stream.write(response.as_bytes()).unwrap();
+    // Flush the stream as it is buffered. Flushing means: "output all the data
+    // (in this case text) which you have accmmulated from me using .write
+    // on you".
+    // If we did not do this, the data would be flushed at another point in time
+    // and not right after the call to the above .write()
+    stream.flush().unwrap();
 }
 
 fn main() {
@@ -36,7 +77,12 @@ fn main() {
     //   in this case is a TcpListener instance
     //
     // It is possible to just pass a string because ::bind() accepts any type
-    // which implements the ToSocketAddrs trait, and strings do
+    // which implements the ToSocketAddrs trait, and String slices do
+    // Slices are a
+    // convenient way of referring to portions of, in this case, Strings.
+    // String literals are treated as String slices, that is "str"s and can
+    // be thought of as a slice pointing to some section of the .text portion
+    // of the binary
     let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
 
     println!("Bound TCP listener socket at {} on port {}.\nListening...",
@@ -56,10 +102,10 @@ fn main() {
         // between the host and the client and can be used to write to/read from
         let stream = stream.unwrap();
 
-        println!("Connection established!");
+        println!("=== Connection established!\n");
 
         handle_connection(stream);
 
-        println!("Closing connection.");
+        println!("=== Closing connection.\n");
     }
 }
